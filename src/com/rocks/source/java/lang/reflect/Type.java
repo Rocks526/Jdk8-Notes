@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.lang.reflect;
 
 /**
@@ -30,12 +5,16 @@ package java.lang.reflect;
  * programming language. These include raw types, parameterized types,
  * array types, type variables and primitive types.
  *
+ * Type是Java所有类型的通用顶级接口，包括原始类型、参数化类型、数组类型、类型变量、基元类型等。
+ *
  * @since 1.5
  */
 public interface Type {
     /**
      * Returns a string describing this type, including information
      * about any type parameters.
+     *
+     * 返回类型信息描述，默认实现是toString方法
      *
      * @implSpec The default implementation calls {@code toString}.
      *

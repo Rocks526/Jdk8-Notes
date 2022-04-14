@@ -1,48 +1,7 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 package java.util.concurrent.atomic;
 
 /**
- * An {@code AtomicMarkableReference} maintains an object reference
- * along with a mark bit, that can be updated atomically.
- *
- * <p>Implementation note: This implementation maintains markable
- * references by creating internal objects representing "boxed"
- * [reference, boolean] pairs.
- *
+ *  将版本号改为bool标识，无法彻底解决ABA问题，可以缓解
  * @since 1.5
  * @author Doug Lea
  * @param <V> The type of object referred to by this reference
@@ -51,6 +10,7 @@ public class AtomicMarkableReference<V> {
 
     private static class Pair<T> {
         final T reference;
+        // 版本标识
         final boolean mark;
         private Pair(T reference, boolean mark) {
             this.reference = reference;
@@ -61,12 +21,11 @@ public class AtomicMarkableReference<V> {
         }
     }
 
+    // 值
     private volatile Pair<V> pair;
 
     /**
-     * Creates a new {@code AtomicMarkableReference} with the given
-     * initial values.
-     *
+     *  初始化
      * @param initialRef the initial reference
      * @param initialMark the initial mark
      */
@@ -75,8 +34,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Returns the current value of the reference.
-     *
+     *  获取当前值
      * @return the current value of the reference
      */
     public V getReference() {
@@ -84,8 +42,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Returns the current value of the mark.
-     *
+     *  获取当前版本
      * @return the current value of the mark
      */
     public boolean isMarked() {
@@ -93,9 +50,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Returns the current values of both the reference and the mark.
-     * Typical usage is {@code boolean[1] holder; ref = v.get(holder); }.
-     *
+     *  获取当前值和版本
      * @param markHolder an array of size of at least one. On return,
      * {@code markholder[0]} will hold the value of the mark.
      * @return the current value of the reference
@@ -107,15 +62,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Atomically sets the value of both the reference and mark
-     * to the given update values if the
-     * current reference is {@code ==} to the expected reference
-     * and the current mark is equal to the expected mark.
-     *
-     * <p><a href="package-summary.html#weakCompareAndSet">May fail
-     * spuriously and does not provide ordering guarantees</a>, so is
-     * only rarely an appropriate alternative to {@code compareAndSet}.
-     *
+     *  比较并更新
      * @param expectedReference the expected value of the reference
      * @param newReference the new value for the reference
      * @param expectedMark the expected value of the mark
@@ -131,11 +78,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Atomically sets the value of both the reference and mark
-     * to the given update values if the
-     * current reference is {@code ==} to the expected reference
-     * and the current mark is equal to the expected mark.
-     *
+     *  比较并更新
      * @param expectedReference the expected value of the reference
      * @param newReference the new value for the reference
      * @param expectedMark the expected value of the mark
@@ -148,8 +91,10 @@ public class AtomicMarkableReference<V> {
                                  boolean newMark) {
         Pair<V> current = pair;
         return
+                // 校验
             expectedReference == current.reference &&
             expectedMark == current.mark &&
+                    // 更新
             ((newReference == current.reference &&
               newMark == current.mark) ||
              casPair(current, Pair.of(newReference, newMark)));
@@ -168,14 +113,7 @@ public class AtomicMarkableReference<V> {
     }
 
     /**
-     * Atomically sets the value of the mark to the given update value
-     * if the current reference is {@code ==} to the expected
-     * reference.  Any given invocation of this operation may fail
-     * (return {@code false}) spuriously, but repeated invocation
-     * when the current value holds the expected value and no other
-     * thread is also attempting to set the value will eventually
-     * succeed.
-     *
+     *  更新版本号
      * @param expectedReference the expected value of the reference
      * @param newMark the new value for the mark
      * @return {@code true} if successful
@@ -188,9 +126,9 @@ public class AtomicMarkableReference<V> {
              casPair(current, Pair.of(expectedReference, newMark)));
     }
 
-    // Unsafe mechanics
-
+    // unsafe工具
     private static final sun.misc.Unsafe UNSAFE = sun.misc.Unsafe.getUnsafe();
+    // pair偏移量
     private static final long pairOffset =
         objectFieldOffset(UNSAFE, "pair", AtomicMarkableReference.class);
 

@@ -1,44 +1,11 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 /**
  * A small toolkit of classes that support lock-free thread-safe
  * programming on single variables.  In essence, the classes in this
  * package extend the notion of {@code volatile} values, fields, and
  * array elements to those that also provide an atomic conditional update
  * operation of the form:
+ *
+ * atomic是一个支持无锁线程安全的工具包，底层通过CAS和volatile实现
  *
  *  <pre> {@code boolean compareAndSet(expectedValue, updateValue);}</pre>
  *
@@ -49,12 +16,16 @@
  * unconditionally set values, as well as a weaker conditional atomic
  * update operation {@code weakCompareAndSet} described below.
  *
+ * CAS是操作系统提供的一个原子性CPU指令，可以实现无锁并发编程
+ *
  * <p>The specifications of these methods enable implementations to
  * employ efficient machine-level atomic instructions that are available
  * on contemporary processors.  However on some platforms, support may
  * entail some form of internal locking.  Thus the methods are not
  * strictly guaranteed to be non-blocking --
  * a thread may block transiently before performing the operation.
+ *
+ * 这个工具包的实现依赖底层操作系统，无法保证严格的非阻塞
  *
  * <p>Instances of classes
  * {@link java.util.concurrent.atomic.AtomicBoolean},
@@ -66,6 +37,8 @@
  * methods for that type.  For example, classes {@code AtomicLong} and
  * {@code AtomicInteger} provide atomic increment methods.  One
  * application is to generate sequence numbers, as in:
+ *
+ * 以上每个类都提供单个变量的原子性更新，如果是Vo类型，可以使用AtomicReference包裹
  *
  *  <pre> {@code
  * class Sequencer {
@@ -129,6 +102,8 @@
  * contains <em>Updater</em> classes that can be used to obtain
  * {@code compareAndSet} operations on any selected {@code volatile}
  * field of any selected class.
+ *
+ * 以下几个类基于反射，提供对字段的原子性更新，适用于底层代码无法变更的情况
  *
  * {@link java.util.concurrent.atomic.AtomicReferenceFieldUpdater},
  * {@link java.util.concurrent.atomic.AtomicIntegerFieldUpdater}, and

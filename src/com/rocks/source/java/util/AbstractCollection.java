@@ -1,99 +1,36 @@
-/*
- * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.util;
 
-/**
- * This class provides a skeletal implementation of the <tt>Collection</tt>
- * interface, to minimize the effort required to implement this interface. <p>
- *
- * To implement an unmodifiable collection, the programmer needs only to
- * extend this class and provide implementations for the <tt>iterator</tt> and
- * <tt>size</tt> methods.  (The iterator returned by the <tt>iterator</tt>
- * method must implement <tt>hasNext</tt> and <tt>next</tt>.)<p>
- *
- * To implement a modifiable collection, the programmer must additionally
- * override this class's <tt>add</tt> method (which otherwise throws an
- * <tt>UnsupportedOperationException</tt>), and the iterator returned by the
- * <tt>iterator</tt> method must additionally implement its <tt>remove</tt>
- * method.<p>
- *
- * The programmer should generally provide a void (no argument) and
- * <tt>Collection</tt> constructor, as per the recommendation in the
- * <tt>Collection</tt> interface specification.<p>
- *
- * The documentation for each non-abstract method in this class describes its
- * implementation in detail.  Each of these methods may be overridden if
- * the collection being implemented admits a more efficient implementation.<p>
- *
- * This class is a member of the
- * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @author  Josh Bloch
- * @author  Neal Gafter
- * @see Collection
- * @since 1.2
- */
 
+/**
+ * 集合的基础抽象类，可以直接基于此类进行扩展
+ */
 public abstract class AbstractCollection<E> implements Collection<E> {
-    /**
-     * Sole constructor.  (For invocation by subclass constructors, typically
-     * implicit.)
-     */
+
     protected AbstractCollection() {
+        // 唯一构造器，只能由子类调用
     }
 
-    // Query Operations
+    // ======================= 查询操作 ===================================
 
     /**
-     * Returns an iterator over the elements contained in this collection.
-     *
-     * @return an iterator over the elements contained in this collection
+     * 返回一个迭代器，用于遍历集合
      */
     public abstract Iterator<E> iterator();
 
+    /**
+     * 返回集合元素个数
+     */
     public abstract int size();
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation returns <tt>size() == 0</tt>.
+     * 判断集合是否为空，默认实现为判断size是否为0
      */
     public boolean isEmpty() {
         return size() == 0;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over the elements in the collection,
-     * checking each element in turn for equality with the specified element.
-     *
-     * @throws ClassCastException   {@inheritDoc}
-     * @throws NullPointerException {@inheritDoc}
+     * 判断是否包含某个元素，默认实现为通过迭代器遍历，挨个对比
      */
     public boolean contains(Object o) {
         Iterator<E> it = iterator();
@@ -110,65 +47,26 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation returns an array containing all the elements
-     * returned by this collection's iterator, in the same order, stored in
-     * consecutive elements of the array, starting with index {@code 0}.
-     * The length of the returned array is equal to the number of elements
-     * returned by the iterator, even if the size of this collection changes
-     * during iteration, as might happen if the collection permits
-     * concurrent modification during iteration.  The {@code size} method is
-     * called only as an optimization hint; the correct result is returned
-     * even if the iterator returns a different number of elements.
-     *
-     * <p>This method is equivalent to:
-     *
-     *  <pre> {@code
-     * List<E> list = new ArrayList<E>(size());
-     * for (E e : this)
-     *     list.add(e);
-     * return list.toArray();
-     * }</pre>
+     * 返回一个数组，默认实现通过迭代器遍历实现，返回数组顺序和迭代器遍历一致
      */
     public Object[] toArray() {
-        // Estimate size of array; be prepared to see more or fewer elements
+        // 创建size大小数据
         Object[] r = new Object[size()];
         Iterator<E> it = iterator();
         for (int i = 0; i < r.length; i++) {
+            // 迭代器元素比size小，直接截断，以size为准
             if (! it.hasNext()) // fewer elements than expected
                 return Arrays.copyOf(r, i);
             r[i] = it.next();
         }
+        // 如果迭代器元素个数大于size，则通过finishToArray方法扩容数组，容纳迭代器后续元素
         return it.hasNext() ? finishToArray(r, it) : r;
     }
 
+
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation returns an array containing all the elements
-     * returned by this collection's iterator in the same order, stored in
-     * consecutive elements of the array, starting with index {@code 0}.
-     * If the number of elements returned by the iterator is too large to
-     * fit into the specified array, then the elements are returned in a
-     * newly allocated array with length equal to the number of elements
-     * returned by the iterator, even if the size of this collection
-     * changes during iteration, as might happen if the collection permits
-     * concurrent modification during iteration.  The {@code size} method is
-     * called only as an optimization hint; the correct result is returned
-     * even if the iterator returns a different number of elements.
-     *
-     * <p>This method is equivalent to:
-     *
-     *  <pre> {@code
-     * List<E> list = new ArrayList<E>(size());
-     * for (E e : this)
-     *     list.add(e);
-     * return list.toArray(a);
-     * }</pre>
-     *
-     * @throws ArrayStoreException  {@inheritDoc}
-     * @throws NullPointerException {@inheritDoc}
+     * 将集合返回为数组个数，泛型通过参数传入
+     * 实现逻辑与toArray类似，返回元素个数以迭代器为准
      */
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
@@ -199,23 +97,12 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return it.hasNext() ? finishToArray(r, it) : r;
     }
 
-    /**
-     * The maximum size of array to allocate.
-     * Some VMs reserve some header words in an array.
-     * Attempts to allocate larger arrays may result in
-     * OutOfMemoryError: Requested array size exceeds VM limit
-     */
+    // 数组最大长度，超过此长度，Jvm可能会有问题
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
+
     /**
-     * Reallocates the array being used within toArray when the iterator
-     * returned more elements than expected, and finishes filling it from
-     * the iterator.
-     *
-     * @param r the array, replete with previously stored elements
-     * @param it the in-progress iterator over this collection
-     * @return array containing the elements in the given array, plus any
-     *         further elements returned by the iterator, trimmed to size
+     * 迭代器元素大于size，对数组进行扩容，将迭代器后续元素融入
      */
     @SuppressWarnings("unchecked")
     private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
@@ -235,6 +122,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return (i == r.length) ? r : Arrays.copyOf(r, i);
     }
 
+    // 数组容量扩充
     private static int hugeCapacity(int minCapacity) {
         if (minCapacity < 0) // overflow
             throw new OutOfMemoryError
@@ -244,39 +132,17 @@ public abstract class AbstractCollection<E> implements Collection<E> {
             MAX_ARRAY_SIZE;
     }
 
-    // Modification Operations
+    // ===================== 变更操作 ==========================================
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation always throws an
-     * <tt>UnsupportedOperationException</tt>.
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     * @throws IllegalArgumentException      {@inheritDoc}
-     * @throws IllegalStateException         {@inheritDoc}
+     * 新增一个元素，默认实现不支持此操作
      */
     public boolean add(E e) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over the collection looking for the
-     * specified element.  If it finds the element, it removes the element
-     * from the collection using the iterator's remove method.
-     *
-     * <p>Note that this implementation throws an
-     * <tt>UnsupportedOperationException</tt> if the iterator returned by this
-     * collection's iterator method does not implement the <tt>remove</tt>
-     * method and this collection contains the specified object.
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
+     * 移除一个元素，默认实现是通过迭代器遍历查找并移除
      */
     public boolean remove(Object o) {
         Iterator<E> it = iterator();
@@ -299,19 +165,11 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     }
 
 
-    // Bulk Operations
+    // ======================== 批量操作 =====================================
+
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over the specified collection,
-     * checking each element returned by the iterator in turn to see
-     * if it's contained in this collection.  If all elements are so
-     * contained <tt>true</tt> is returned, otherwise <tt>false</tt>.
-     *
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     * @see #contains(Object)
+     * 判断是否包含目标集合的所有元素，默认for循环调用contain
      */
     public boolean containsAll(Collection<?> c) {
         for (Object e : c)
@@ -321,22 +179,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over the specified collection, and adds
-     * each object returned by the iterator to this collection, in turn.
-     *
-     * <p>Note that this implementation will throw an
-     * <tt>UnsupportedOperationException</tt> unless <tt>add</tt> is
-     * overridden (assuming the specified collection is non-empty).
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     * @throws IllegalArgumentException      {@inheritDoc}
-     * @throws IllegalStateException         {@inheritDoc}
-     *
-     * @see #add(Object)
+     * 批量新增元素，默认for调用add
      */
     public boolean addAll(Collection<? extends E> c) {
         boolean modified = false;
@@ -346,26 +189,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return modified;
     }
 
+
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over this collection, checking each
-     * element returned by the iterator in turn to see if it's contained
-     * in the specified collection.  If it's so contained, it's removed from
-     * this collection with the iterator's <tt>remove</tt> method.
-     *
-     * <p>Note that this implementation will throw an
-     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
-     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
-     * and this collection contains one or more elements in common with the
-     * specified collection.
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     *
-     * @see #remove(Object)
-     * @see #contains(Object)
+     * 批量移除元素，默认通过迭代器遍历，contain对比实现
      */
     public boolean removeAll(Collection<?> c) {
         Objects.requireNonNull(c);
@@ -380,26 +206,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return modified;
     }
 
+
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over this collection, checking each
-     * element returned by the iterator in turn to see if it's contained
-     * in the specified collection.  If it's not so contained, it's removed
-     * from this collection with the iterator's <tt>remove</tt> method.
-     *
-     * <p>Note that this implementation will throw an
-     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
-     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
-     * and this collection contains one or more elements not present in the
-     * specified collection.
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     *
-     * @see #remove(Object)
-     * @see #contains(Object)
+     * 保留集合与参数集合的交集部分，默认迭代器遍历 + contain方法实现
      */
     public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c);
@@ -414,20 +223,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return modified;
     }
 
+
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation iterates over this collection, removing each
-     * element using the <tt>Iterator.remove</tt> operation.  Most
-     * implementations will probably choose to override this method for
-     * efficiency.
-     *
-     * <p>Note that this implementation will throw an
-     * <tt>UnsupportedOperationException</tt> if the iterator returned by this
-     * collection's <tt>iterator</tt> method does not implement the
-     * <tt>remove</tt> method and this collection is non-empty.
-     *
-     * @throws UnsupportedOperationException {@inheritDoc}
+     * 清空集合，默认迭代器遍历删除
      */
     public void clear() {
         Iterator<E> it = iterator();
@@ -438,17 +236,10 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     }
 
 
-    //  String conversion
+    //  ============== 字符串转换 ==========================================
 
     /**
-     * Returns a string representation of this collection.  The string
-     * representation consists of a list of the collection's elements in the
-     * order they are returned by its iterator, enclosed in square brackets
-     * (<tt>"[]"</tt>).  Adjacent elements are separated by the characters
-     * <tt>", "</tt> (comma and space).  Elements are converted to strings as
-     * by {@link String#valueOf(Object)}.
-     *
-     * @return a string representation of this collection
+     * 集合输出，默认为： [v1, v2, v3 .....]
      */
     public String toString() {
         Iterator<E> it = iterator();

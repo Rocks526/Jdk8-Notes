@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2003, 2004, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.lang.reflect;
 
 
@@ -41,6 +16,8 @@ package java.lang.reflect;
  * <p>Instances of classes that implement this interface must implement
  * an equals() method that equates any two instances that share the
  * same generic type declaration and have equal type parameters.
+ *
+ * ParameterizedType表示参数化类型，例如List<String>
  *
  * @since 1.5
  */
@@ -61,6 +38,12 @@ public interface ParameterizedType extends Type {
      *     actual type parameters refer to a parameterized type that cannot
      *     be instantiated for any reason
      * @since 1.5
+     *
+     * 返回实际类型数组，例如：
+     * List<String>返回String
+     * Map<String,Integer>返回[String,Integer]
+     * List<T>返回TypeVariable
+     *
      */
     Type[] getActualTypeArguments();
 
@@ -71,6 +54,12 @@ public interface ParameterizedType extends Type {
      * @return the {@code Type} object representing the class or interface
      *     that declared this type
      * @since 1.5
+     *
+     * 返回原类型，例如：
+     * List<String>返回List
+     * Map<String,Integer>返回Map
+     * List<T>返回List
+     *
      */
     Type getRawType();
 
@@ -90,6 +79,9 @@ public interface ParameterizedType extends Type {
      *     refers to a parameterized type that cannot be instantiated
      *     for any reason
      * @since 1.5
+     *
+     * 返回所属类型，如果是内部类，返回父类，如果是父类，则返回null
+     *
      */
     Type getOwnerType();
 }

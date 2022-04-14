@@ -1,75 +1,35 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 package java.util.concurrent.atomic;
 import java.util.function.IntUnaryOperator;
 import java.util.function.IntBinaryOperator;
 import sun.misc.Unsafe;
 
 /**
- * An {@code int} value that may be updated atomically.  See the
- * {@link java.util.concurrent.atomic} package specification for
- * description of the properties of atomic variables. An
- * {@code AtomicInteger} is used in applications such as atomically
- * incremented counters, and cannot be used as a replacement for an
- * {@link java.lang.Integer}. However, this class does extend
- * {@code Number} to allow uniform access by tools and utilities that
- * deal with numerically-based classes.
  *
+ *  AtomicInteger是一个原子性的int更新类，循环CAS + volatile 实现多写多读的线程安全
  * @since 1.5
  * @author Doug Lea
 */
 public class AtomicInteger extends Number implements java.io.Serializable {
     private static final long serialVersionUID = 6214790243416807050L;
 
-    // setup to use Unsafe.compareAndSwapInt for updates
+    // 通过Unsafe的CAS操作实现原子性更新
     private static final Unsafe unsafe = Unsafe.getUnsafe();
+    // AtomicInteger对象的value值在内存中的地址偏移量
     private static final long valueOffset;
 
     static {
         try {
+            // 获取内存地址偏移量
             valueOffset = unsafe.objectFieldOffset
                 (AtomicInteger.class.getDeclaredField("value"));
         } catch (Exception ex) { throw new Error(ex); }
     }
 
+    // 值
     private volatile int value;
 
     /**
-     * Creates a new AtomicInteger with the given initial value.
-     *
+     *  创建一个带初始值的AtomicInteger
      * @param initialValue the initial value
      */
     public AtomicInteger(int initialValue) {
@@ -77,14 +37,13 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Creates a new AtomicInteger with initial value {@code 0}.
+     * 创建一个AtomicInteger，初始值为0
      */
     public AtomicInteger() {
     }
 
     /**
-     * Gets the current value.
-     *
+     * 获取当前值
      * @return the current value
      */
     public final int get() {
@@ -92,8 +51,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Sets to the given value.
-     *
+     * 设置值，set操作本身就是原子性，不需要CAS
      * @param newValue the new value
      */
     public final void set(int newValue) {
@@ -101,8 +59,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Eventually sets to the given value.
-     *
+     *  原子性设置值，延迟设置，不会立刻清除其他线程的缓存
      * @param newValue the new value
      * @since 1.6
      */
@@ -111,8 +68,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets to the given value and returns the old value.
-     *
+     *  原子性设置值并返回旧的值
      * @param newValue the new value
      * @return the previous value
      */
@@ -121,9 +77,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
-     *
+     *  CAS操作，当前值为 expect 时则更新为 update
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful. False return indicates that
@@ -134,12 +88,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
-     *
-     * <p><a href="package-summary.html#weakCompareAndSet">May fail
-     * spuriously and does not provide ordering guarantees</a>, so is
-     * only rarely an appropriate alternative to {@code compareAndSet}.
+     *  compareAndSet替代此方法
      *
      * @param expect the expected value
      * @param update the new value
@@ -150,8 +99,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically increments by one the current value.
-     *
+     *  原子性获取并自增
      * @return the previous value
      */
     public final int getAndIncrement() {
@@ -159,8 +107,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically decrements by one the current value.
-     *
+     *  原子性获取并自减
      * @return the previous value
      */
     public final int getAndDecrement() {
@@ -168,8 +115,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically adds the given value to the current value.
-     *
+     *  原子性获取并自增指定值
      * @param delta the value to add
      * @return the previous value
      */
@@ -178,8 +124,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically increments by one the current value.
-     *
+     *  原子性自增并返回自增后的值
      * @return the updated value
      */
     public final int incrementAndGet() {
@@ -187,8 +132,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically decrements by one the current value.
-     *
+     *  原子性自减并返回自减后的值
      * @return the updated value
      */
     public final int decrementAndGet() {
@@ -196,8 +140,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically adds the given value to the current value.
-     *
+     *  原子性自增指定值并返回自增后的值
      * @param delta the value to add
      * @return the updated value
      */
@@ -206,10 +149,8 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the previous value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
+     *
+     * 原子性更新并返回旧的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      *
      * @param updateFunction a side-effect-free function
      * @return the previous value
@@ -220,15 +161,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         do {
             prev = get();
             next = updateFunction.applyAsInt(prev);
+            // 循环CAS
         } while (!compareAndSet(prev, next));
         return prev;
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the updated value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
+     *
+     * 原子性更新并返回更新后的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      *
      * @param updateFunction a side-effect-free function
      * @return the updated value
@@ -239,18 +179,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         do {
             prev = get();
             next = updateFunction.applyAsInt(prev);
+            // 循环CAS
         } while (!compareAndSet(prev, next));
         return next;
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the previous value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
+     *
+     * 原子性更新并返回旧的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      *
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
@@ -263,18 +199,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         do {
             prev = get();
             next = accumulatorFunction.applyAsInt(prev, x);
+            // 循环CAS
         } while (!compareAndSet(prev, next));
         return prev;
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the updated value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
+     *
+     * 原子性更新并返回更新后的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      *
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
@@ -287,12 +219,13 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         do {
             prev = get();
             next = accumulatorFunction.applyAsInt(prev, x);
+            // 循环CAS
         } while (!compareAndSet(prev, next));
         return next;
     }
 
     /**
-     * Returns the String representation of the current value.
+     * 输出当前值
      * @return the String representation of the current value
      */
     public String toString() {
@@ -300,15 +233,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicInteger} as an {@code int}.
+     * 返回当前值的int值
      */
     public int intValue() {
         return get();
     }
 
     /**
-     * Returns the value of this {@code AtomicInteger} as a {@code long}
-     * after a widening primitive conversion.
+     * 返回当前值的long值
      * @jls 5.1.2 Widening Primitive Conversions
      */
     public long longValue() {
@@ -316,8 +248,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicInteger} as a {@code float}
-     * after a widening primitive conversion.
+     * 返回当前值的float值
      * @jls 5.1.2 Widening Primitive Conversions
      */
     public float floatValue() {
@@ -325,8 +256,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicInteger} as a {@code double}
-     * after a widening primitive conversion.
+     * 返回当前值的double值
      * @jls 5.1.2 Widening Primitive Conversions
      */
     public double doubleValue() {

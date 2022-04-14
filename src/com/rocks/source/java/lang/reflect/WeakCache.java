@@ -33,6 +33,9 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
+ *
+ * 动态生成代理类的缓存
+ *
  * Cache mapping pairs of {@code (key, sub-key) -> value}. Keys and values are
  * weakly but sub-keys are strongly referenced.  Keys are passed directly to
  * {@link #get} method which also takes a {@code parameter}. Sub-keys are
@@ -50,9 +53,9 @@ import java.util.function.Supplier;
  * key/subKey.
  *
  * @author Peter Levart
- * @param <K> type of keys
- * @param <P> type of parameters
- * @param <V> type of values
+ * @param <K> type of keys    缓存Key类型
+ * @param <P> type of parameters    缓存参数类型
+ * @param <V> type of values    缓存Value类型
  */
 final class WeakCache<K, P, V> {
 
@@ -83,6 +86,7 @@ final class WeakCache<K, P, V> {
     }
 
     /**
+     * 根据Key和Param查找缓存数据
      * Look-up the value through the cache. This always evaluates the
      * {@code subKeyFactory} function and optionally evaluates
      * {@code valueFactory} function if there is no entry in the cache for given
@@ -98,6 +102,7 @@ final class WeakCache<K, P, V> {
      *                              calculated by {@code valueFactory} is null.
      */
     public V get(K key, P parameter) {
+        // 非空校验
         Objects.requireNonNull(parameter);
 
         expungeStaleEntries();

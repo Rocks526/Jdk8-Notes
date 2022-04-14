@@ -1,34 +1,12 @@
-/*
- * Copyright (c) 2003, 2004, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.lang.reflect;
 
 /**
  * {@code GenericArrayType} represents an array type whose component
  * type is either a parameterized type or a type variable.
  * @since 1.5
+ *
+ * 泛型数组类型，例如List<String>[]
+ *
  */
 public interface GenericArrayType extends Type {
     /**
@@ -47,6 +25,9 @@ public interface GenericArrayType extends Type {
      * @throws MalformedParameterizedTypeException if  the
      *     underlying array type's component type refers to a
      *     parameterized type that cannot be instantiated for any reason
+     * 返回数组的元素类型，例如：
+     * List<String>[]返回List<String>
+     * List<String>[][]返回List<String>[]
      */
     Type getGenericComponentType();
 }

@@ -1,27 +1,3 @@
-/*
- * Copyright (c) 1994, 2016, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 
 package java.lang;
 
@@ -46,6 +22,9 @@ import sun.security.util.SecurityConstants;
  * A <i>thread</i> is a thread of execution in a program. The Java
  * Virtual Machine allows an application to have multiple threads of
  * execution running concurrently.
+ *
+ * 线程是应用程序执行的单位，Java虚拟机允许程序并行执行多个线程。
+ *
  * <p>
  * Every thread has a priority. Threads with higher priority are
  * executed in preference to threads with lower priority. Each thread
@@ -54,6 +33,10 @@ import sun.security.util.SecurityConstants;
  * thread has its priority initially set equal to the priority of the
  * creating thread, and is a daemon thread if and only if the
  * creating thread is a daemon.
+ *
+ * 每个线程都有优先级，高优先级的线程更容易得到执行。
+ * 每个线程都有一个是否后台线程标记(守护线程)，当程序运行时创建一个线程，新创建的线程会继承当前线程的优先级和是否后台线程标识。
+ *
  * <p>
  * When a Java Virtual Machine starts up, there is usually a single
  * non-daemon thread (which typically calls the method named
@@ -69,6 +52,11 @@ import sun.security.util.SecurityConstants;
  *     throwing an exception that propagates beyond the <code>run</code>
  *     method.
  * </ul>
+ *
+ * Java虚拟机启动时通常只有一个名称为main的非守护线程和一堆守护线程，Java虚拟机结束条件为：
+ *      1.调用System.exit()方法主动退出
+ *      2.所有非守护线程死亡，即执行run()方法结束或抛出异常
+ *
  * <p>
  * There are two ways to create a new thread of execution. One is to
  * declare a class to be a subclass of <code>Thread</code>. This
@@ -96,6 +84,9 @@ import sun.security.util.SecurityConstants;
  *     p.start();
  * </pre></blockquote>
  * <p>
+ *
+ *     创建线程的方式有两种，一种是子类继承Thread接口，重写run方法，调用start方法即可启动线程
+ *
  * The other way to create a thread is to declare a class that
  * implements the <code>Runnable</code> interface. That class then
  * implements the <code>run</code> method. An instance of the class can
@@ -121,10 +112,16 @@ import sun.security.util.SecurityConstants;
  *     PrimeRun p = new PrimeRun(143);
  *     new Thread(p).start();
  * </pre></blockquote>
+ *
+ *      另一种方式是继承Runnable接口，实现run方法，创建线程时，将该类传入即可。
+ *
  * <p>
  * Every thread has a name for identification purposes. More than
  * one thread may have the same name. If a name is not specified when
  * a thread is created, a new name is generated for it.
+ *
+ * 为了便于识别，每个线程都有有一个名字，如果没有设置，则Java虚拟机会自动生成一个名称。
+ *
  * <p>
  * Unless otherwise noted, passing a {@code null} argument to a constructor
  * or method in this class will cause a {@link NullPointerException} to be
@@ -139,32 +136,60 @@ import sun.security.util.SecurityConstants;
  */
 public
 class Thread implements Runnable {
+
+    /**
+     * 注册线程
+     */
     /* Make sure registerNatives is the first thing <clinit> does. */
     private static native void registerNatives();
     static {
         registerNatives();
     }
 
+    /**
+     * 名称
+     */
     private volatile String name;
+    /**
+     * 优先级
+     */
     private int            priority;
+    /**
+     * 线程标识
+     */
     private Thread         threadQ;
     private long           eetop;
 
     /* Whether or not to single_step this thread. */
     private boolean     single_step;
 
+    /**
+     * 是否守护线程
+     */
     /* Whether or not the thread is a daemon thread. */
     private boolean     daemon = false;
 
+    /**
+     * Jvm状态
+     */
     /* JVM state */
     private boolean     stillborn = false;
 
+    /**
+     * 要执行的任务
+     */
     /* What will be run. */
     private Runnable target;
 
+    /**
+     * 线程组
+     */
     /* The group of this thread */
     private ThreadGroup group;
 
+    /**
+     * 类加载器
+     */
     /* The context ClassLoader for this thread */
     private ClassLoader contextClassLoader;
 
@@ -278,6 +303,9 @@ class Thread implements Runnable {
      * bugs due to race conditions. It may also be useful when designing
      * concurrency control constructs such as the ones in the
      * {@link java.util.concurrent.locks} package.
+     *
+     * 将当前线程挂起，让出CPU调度 （CPU可忽略这个信号）
+     *
      */
     public static native void yield();
 
@@ -286,6 +314,10 @@ class Thread implements Runnable {
      * execution) for the specified number of milliseconds, subject to
      * the precision and accuracy of system timers and schedulers. The thread
      * does not lose ownership of any monitors.
+     *
+     * 让线程让出cpu使用权，进入休眠，沉睡指定时间。
+     * 可以通过中断异常唤醒当前线程，抛出异常后会自动清除中断标识。
+     * 沉睡时不会放弃对锁的持有。
      *
      * @param  millis
      *         the length of time to sleep in milliseconds
@@ -342,6 +374,9 @@ class Thread implements Runnable {
 
     /**
      * Initializes a Thread with the current AccessControlContext.
+     *
+     * 使用当前AccessControlContext初始化线程
+     *
      * @see #init(ThreadGroup,Runnable,String,long,AccessControlContext,boolean)
      */
     private void init(ThreadGroup g, Runnable target, String name,
@@ -690,6 +725,8 @@ class Thread implements Runnable {
      * It is never legal to start a thread more than once.
      * In particular, a thread may not be restarted once it has completed
      * execution.
+     *
+     * 启动线程，一个线程只能启动一次。
      *
      * @exception  IllegalThreadStateException  if the thread was already
      *               started.

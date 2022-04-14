@@ -1,38 +1,10 @@
-/*
- * Copyright (c) 2004, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.io;
 
 import java.io.IOException;
 
 /**
- * A <tt>Flushable</tt> is a destination of data that can be flushed.  The
- * flush method is invoked to write any buffered output to the underlying
- * stream.
- *
- * @since 1.5
+ * 可刷新的对象
+ * 调用flush方法将任何缓冲区数据刷入底层
  */
 public interface Flushable {
 

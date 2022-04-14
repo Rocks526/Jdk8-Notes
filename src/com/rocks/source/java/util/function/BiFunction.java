@@ -27,15 +27,10 @@ package java.util.function;
 import java.util.Objects;
 
 /**
- * Represents a function that accepts two arguments and produces a result.
- * This is the two-arity specialization of {@link Function}.
- *
- * <p>This is a <a href="package-summary.html">functional interface</a>
- * whose functional method is {@link #apply(Object, Object)}.
- *
- * @param <T> the type of the first argument to the function
- * @param <U> the type of the second argument to the function
- * @param <R> the type of the result of the function
+ *  接收两个参数，返回一个计算结果
+ * @param <T> 第一个参数的类型
+ * @param <U> 第二个参数的类型
+ * @param <R> 函数返回结果类型
  *
  * @see Function
  * @since 1.8
@@ -44,8 +39,7 @@ import java.util.Objects;
 public interface BiFunction<T, U, R> {
 
     /**
-     * Applies this function to the given arguments.
-     *
+     * 将此函数应用于指定函数
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result

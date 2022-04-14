@@ -1,33 +1,10 @@
-/*
- * Copyright (c) 2003, 2004, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.lang.reflect;
 
 /**
  * WildcardType represents a wildcard type expression, such as
  * {@code ?}, {@code ? extends Number}, or {@code ? super Integer}.
+ *
+ * 通配符泛型，例如List<? extends Integer>
  *
  * @since 1.5
  */
@@ -52,6 +29,7 @@ public interface WildcardType extends Type {
      * @throws MalformedParameterizedTypeException if any of the
      *     bounds refer to a parameterized type that cannot be instantiated
      *     for any reason
+     * 返回通配符泛型变量的上限，例如List<? extends Integer>返回Integer，List<? super Integer>返回Object
      */
     Type[] getUpperBounds();
 
@@ -76,6 +54,7 @@ public interface WildcardType extends Type {
      * @throws MalformedParameterizedTypeException if any of the
      *     bounds refer to a parameterized type that cannot be instantiated
      *     for any reason
+     * 返回通配符泛型变量的下限，例如List<? extends Integer>返回[]，List<? super Integer>返回Integer
      */
     Type[] getLowerBounds();
     // one or many? Up to language spec; currently only one, but this API

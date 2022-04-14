@@ -1,84 +1,43 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 package java.util.concurrent.atomic;
 import java.util.function.UnaryOperator;
 import java.util.function.BinaryOperator;
 import sun.misc.Unsafe;
 
 /**
- * An object reference that may be updated atomically. See the {@link
- * java.util.concurrent.atomic} package specification for description
- * of the properties of atomic variables.
- * @since 1.5
- * @author Doug Lea
- * @param <V> The type of object referred to by this reference
+ * 针对引用类型的更新器，无法解决ABA问题
  */
 public class AtomicReference<V> implements java.io.Serializable {
     private static final long serialVersionUID = -1848883965231344442L;
 
+    // unsafe工具
     private static final Unsafe unsafe = Unsafe.getUnsafe();
+    // value的偏移量
     private static final long valueOffset;
 
     static {
         try {
+            // 获取偏移量
             valueOffset = unsafe.objectFieldOffset
                 (AtomicReference.class.getDeclaredField("value"));
         } catch (Exception ex) { throw new Error(ex); }
     }
 
+    // 实际值
     private volatile V value;
 
     /**
-     * Creates a new AtomicReference with the given initial value.
-     *
+     *  初始值
      * @param initialValue the initial value
      */
     public AtomicReference(V initialValue) {
         value = initialValue;
     }
 
-    /**
-     * Creates a new AtomicReference with null initial value.
-     */
     public AtomicReference() {
     }
 
     /**
-     * Gets the current value.
-     *
+     *  返回当前值
      * @return the current value
      */
     public final V get() {
@@ -86,8 +45,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Sets to the given value.
-     *
+     * 设置成目标值，set操作本身就是原子性，不需要CAS
      * @param newValue the new value
      */
     public final void set(V newValue) {
@@ -95,8 +53,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Eventually sets to the given value.
-     *
+     * 原子性设置值，延迟设置，不会立刻清除其他线程的缓存
      * @param newValue the new value
      * @since 1.6
      */
@@ -105,8 +62,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
+     * CAS操作，当前值为 expect 时则更新为 update
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful. False return indicates that
@@ -117,13 +73,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
-     *
-     * <p><a href="package-summary.html#weakCompareAndSet">May fail
-     * spuriously and does not provide ordering guarantees</a>, so is
-     * only rarely an appropriate alternative to {@code compareAndSet}.
-     *
+     *  compareAndSet替代此方法
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful
@@ -133,8 +83,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets to the given value and returns the old value.
-     *
+     *  原子性设置值并返回旧的值
      * @param newValue the new value
      * @return the previous value
      */
@@ -144,11 +93,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the previous value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
-     *
+     *  原子性更新并返回旧的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      * @param updateFunction a side-effect-free function
      * @return the previous value
      * @since 1.8
@@ -163,11 +108,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the updated value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
-     *
+     *  原子性更新并返回更新后的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      * @param updateFunction a side-effect-free function
      * @return the updated value
      * @since 1.8
@@ -182,14 +123,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the previous value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
-     *
+     *  原子性更新并返回旧的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
      * @return the previous value
@@ -206,14 +140,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the updated value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
-     *
+     *  原子性更新并返回更新后的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
      * @return the updated value
@@ -230,7 +157,7 @@ public class AtomicReference<V> implements java.io.Serializable {
     }
 
     /**
-     * Returns the String representation of the current value.
+     * 输出当前值
      * @return the String representation of the current value
      */
     public String toString() {

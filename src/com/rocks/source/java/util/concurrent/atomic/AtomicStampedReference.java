@@ -1,47 +1,8 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 package java.util.concurrent.atomic;
 
 /**
- * An {@code AtomicStampedReference} maintains an object reference
- * along with an integer "stamp", that can be updated atomically.
  *
- * <p>Implementation note: This implementation maintains stamped
- * references by creating internal objects representing "boxed"
- * [reference, integer] pairs.
+ * AtomicReference无法解决ABA的问题，AtomicStampedReference增加了版本号，可以解决ABA
  *
  * @since 1.5
  * @author Doug Lea
@@ -49,6 +10,7 @@ package java.util.concurrent.atomic;
  */
 public class AtomicStampedReference<V> {
 
+    // 针对实际的值进行包装，增加版本号
     private static class Pair<T> {
         final T reference;
         final int stamp;
@@ -61,12 +23,11 @@ public class AtomicStampedReference<V> {
         }
     }
 
+    // 值
     private volatile Pair<V> pair;
 
     /**
-     * Creates a new {@code AtomicStampedReference} with the given
-     * initial values.
-     *
+     *  带初始值的构造方法
      * @param initialRef the initial reference
      * @param initialStamp the initial stamp
      */
@@ -75,17 +36,15 @@ public class AtomicStampedReference<V> {
     }
 
     /**
-     * Returns the current value of the reference.
-     *
-     * @return the current value of the reference
+     * 获取值
+     * @return
      */
     public V getReference() {
         return pair.reference;
     }
 
     /**
-     * Returns the current value of the stamp.
-     *
+     *  获取版本
      * @return the current value of the stamp
      */
     public int getStamp() {
@@ -93,9 +52,7 @@ public class AtomicStampedReference<V> {
     }
 
     /**
-     * Returns the current values of both the reference and the stamp.
-     * Typical usage is {@code int[1] holder; ref = v.get(holder); }.
-     *
+     *  返回值和当前的版本，版本号放到入参的int[0]
      * @param stampHolder an array of size of at least one.  On return,
      * {@code stampholder[0]} will hold the value of the stamp.
      * @return the current value of the reference
@@ -107,15 +64,7 @@ public class AtomicStampedReference<V> {
     }
 
     /**
-     * Atomically sets the value of both the reference and stamp
-     * to the given update values if the
-     * current reference is {@code ==} to the expected reference
-     * and the current stamp is equal to the expected stamp.
-     *
-     * <p><a href="package-summary.html#weakCompareAndSet">May fail
-     * spuriously and does not provide ordering guarantees</a>, so is
-     * only rarely an appropriate alternative to {@code compareAndSet}.
-     *
+     *  比较并更新，要求值相等，并且版本号相等
      * @param expectedReference the expected value of the reference
      * @param newReference the new value for the reference
      * @param expectedStamp the expected value of the stamp
@@ -131,11 +80,7 @@ public class AtomicStampedReference<V> {
     }
 
     /**
-     * Atomically sets the value of both the reference and stamp
-     * to the given update values if the
-     * current reference is {@code ==} to the expected reference
-     * and the current stamp is equal to the expected stamp.
-     *
+     *  比较并更新，要求值相等，并且版本号相等
      * @param expectedReference the expected value of the reference
      * @param newReference the new value for the reference
      * @param expectedStamp the expected value of the stamp
@@ -148,16 +93,17 @@ public class AtomicStampedReference<V> {
                                  int newStamp) {
         Pair<V> current = pair;
         return
+                // 校验
             expectedReference == current.reference &&
             expectedStamp == current.stamp &&
+                    // 更新
             ((newReference == current.reference &&
               newStamp == current.stamp) ||
              casPair(current, Pair.of(newReference, newStamp)));
     }
 
     /**
-     * Unconditionally sets the value of both the reference and stamp.
-     *
+     *  设置新的值和版本号
      * @param newReference the new value for the reference
      * @param newStamp the new value for the stamp
      */
@@ -168,14 +114,7 @@ public class AtomicStampedReference<V> {
     }
 
     /**
-     * Atomically sets the value of the stamp to the given update value
-     * if the current reference is {@code ==} to the expected
-     * reference.  Any given invocation of this operation may fail
-     * (return {@code false}) spuriously, but repeated invocation
-     * when the current value holds the expected value and no other
-     * thread is also attempting to set the value will eventually
-     * succeed.
-     *
+     *  更新版本号
      * @param expectedReference the expected value of the reference
      * @param newStamp the new value for the stamp
      * @return {@code true} if successful
@@ -188,9 +127,9 @@ public class AtomicStampedReference<V> {
              casPair(current, Pair.of(expectedReference, newStamp)));
     }
 
-    // Unsafe mechanics
-
+    // unsafe工具
     private static final sun.misc.Unsafe UNSAFE = sun.misc.Unsafe.getUnsafe();
+    // pair的偏移量
     private static final long pairOffset =
         objectFieldOffset(UNSAFE, "pair", AtomicStampedReference.class);
 

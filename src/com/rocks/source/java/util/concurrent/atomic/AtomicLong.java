@@ -1,89 +1,44 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
 package java.util.concurrent.atomic;
 import java.util.function.LongUnaryOperator;
 import java.util.function.LongBinaryOperator;
 import sun.misc.Unsafe;
 
 /**
- * A {@code long} value that may be updated atomically.  See the
- * {@link java.util.concurrent.atomic} package specification for
- * description of the properties of atomic variables. An
- * {@code AtomicLong} is used in applications such as atomically
- * incremented sequence numbers, and cannot be used as a replacement
- * for a {@link java.lang.Long}. However, this class does extend
- * {@code Number} to allow uniform access by tools and utilities that
- * deal with numerically-based classes.
- *
+ *  类似于AtomicInteger，基于CAS + Volatile 实现的多谢多读的线程安全类
  * @since 1.5
  * @author Doug Lea
  */
 public class AtomicLong extends Number implements java.io.Serializable {
     private static final long serialVersionUID = 1927816293512124184L;
 
-    // setup to use Unsafe.compareAndSwapLong for updates
+    // unsafe工具引用
     private static final Unsafe unsafe = Unsafe.getUnsafe();
+    // value的偏移量
     private static final long valueOffset;
 
     /**
-     * Records whether the underlying JVM supports lockless
-     * compareAndSwap for longs. While the Unsafe.compareAndSwapLong
-     * method works in either case, some constructions should be
-     * handled at Java level to avoid locking user-visible locks.
+     * 底层硬件是否支持Long的CAS操作
      */
     static final boolean VM_SUPPORTS_LONG_CAS = VMSupportsCS8();
 
     /**
-     * Returns whether underlying JVM supports lockless CompareAndSet
-     * for longs. Called only once and cached in VM_SUPPORTS_LONG_CAS.
+     * 判断底层硬件是否支持Long的CAS操作
      */
     private static native boolean VMSupportsCS8();
 
     static {
         try {
+            // 获取value的偏移量
             valueOffset = unsafe.objectFieldOffset
                 (AtomicLong.class.getDeclaredField("value"));
         } catch (Exception ex) { throw new Error(ex); }
     }
 
+    // 实际的值
     private volatile long value;
 
     /**
-     * Creates a new AtomicLong with the given initial value.
-     *
+     *  带初始值的构造方法
      * @param initialValue the initial value
      */
     public AtomicLong(long initialValue) {
@@ -91,13 +46,13 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Creates a new AtomicLong with initial value {@code 0}.
+     * 初始值为0
      */
     public AtomicLong() {
     }
 
     /**
-     * Gets the current value.
+     * 获取当前值
      *
      * @return the current value
      */
@@ -106,8 +61,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Sets to the given value.
-     *
+     *  设置成目标值，set操作本身就是原子性，不需要CAS
      * @param newValue the new value
      */
     public final void set(long newValue) {
@@ -115,8 +69,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Eventually sets to the given value.
-     *
+     *  原子性设置值，延迟设置，不会立刻清除其他线程的缓存
      * @param newValue the new value
      * @since 1.6
      */
@@ -125,8 +78,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets to the given value and returns the old value.
-     *
+     *  原子性设置值并返回旧的值
      * @param newValue the new value
      * @return the previous value
      */
@@ -135,9 +87,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
-     *
+     *  CAS操作，当前值为 expect 时则更新为 update
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful. False return indicates that
@@ -148,13 +98,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically sets the value to the given updated value
-     * if the current value {@code ==} the expected value.
-     *
-     * <p><a href="package-summary.html#weakCompareAndSet">May fail
-     * spuriously and does not provide ordering guarantees</a>, so is
-     * only rarely an appropriate alternative to {@code compareAndSet}.
-     *
+     *  compareAndSet替代此方法
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful
@@ -164,8 +108,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically increments by one the current value.
-     *
+     *  原子性获取并自增
      * @return the previous value
      */
     public final long getAndIncrement() {
@@ -173,8 +116,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically decrements by one the current value.
-     *
+     *  原子性获取并自减
      * @return the previous value
      */
     public final long getAndDecrement() {
@@ -182,8 +124,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically adds the given value to the current value.
-     *
+     *  原子性获取并自增指定值
      * @param delta the value to add
      * @return the previous value
      */
@@ -192,8 +133,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically increments by one the current value.
-     *
+     *  原子性自增并返回自增后的值
      * @return the updated value
      */
     public final long incrementAndGet() {
@@ -201,8 +141,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically decrements by one the current value.
-     *
+     *  原子性自减并返回自减后的值
      * @return the updated value
      */
     public final long decrementAndGet() {
@@ -210,8 +149,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically adds the given value to the current value.
-     *
+     *  原子性自增指定值并返回自增后的值
      * @param delta the value to add
      * @return the updated value
      */
@@ -220,11 +158,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the previous value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
-     *
+     *  原子性更新并返回旧的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      * @param updateFunction a side-effect-free function
      * @return the previous value
      * @since 1.8
@@ -239,11 +173,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function, returning the updated value. The
-     * function should be side-effect-free, since it may be re-applied
-     * when attempted updates fail due to contention among threads.
-     *
+     *  原子性更新并返回更新后的值，传入一个更新函数，根据旧的值进行更新（函数需要支持幂等，可能多次重试）
      * @param updateFunction a side-effect-free function
      * @return the updated value
      * @since 1.8
@@ -258,14 +188,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the previous value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
-     *
+     *  原子性更新并返回旧的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
      * @return the previous value
@@ -282,14 +205,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Atomically updates the current value with the results of
-     * applying the given function to the current and given values,
-     * returning the updated value. The function should be
-     * side-effect-free, since it may be re-applied when attempted
-     * updates fail due to contention among threads.  The function
-     * is applied with the current value as its first argument,
-     * and the given update as the second argument.
-     *
+     *  原子性更新并返回更新后的值，传入一个更新函数，根据旧的值和另一个传入参数进行更新（函数需要支持幂等，可能多次重试）
      * @param x the update value
      * @param accumulatorFunction a side-effect-free function of two arguments
      * @return the updated value
@@ -306,7 +222,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the String representation of the current value.
+     * 输出当前值
      * @return the String representation of the current value
      */
     public String toString() {
@@ -314,8 +230,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicLong} as an {@code int}
-     * after a narrowing primitive conversion.
+     * 返回当前值的int值
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
     public int intValue() {
@@ -323,15 +238,14 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicLong} as a {@code long}.
+     * 返回当前值的long值
      */
     public long longValue() {
         return get();
     }
 
     /**
-     * Returns the value of this {@code AtomicLong} as a {@code float}
-     * after a widening primitive conversion.
+     * 返回当前值的float值
      * @jls 5.1.2 Widening Primitive Conversions
      */
     public float floatValue() {
@@ -339,8 +253,7 @@ public class AtomicLong extends Number implements java.io.Serializable {
     }
 
     /**
-     * Returns the value of this {@code AtomicLong} as a {@code double}
-     * after a widening primitive conversion.
+     * 返回当前值的double值
      * @jls 5.1.2 Widening Primitive Conversions
      */
     public double doubleValue() {

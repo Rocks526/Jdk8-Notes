@@ -1,15 +1,12 @@
-- [tips](#tips)
-- [Object类介绍](#介绍)
-- [Object类属性](#属性)
-- [Object类方法](#方法)
+# 一：Object类介绍
 
-# <a id="tips">tips</a>
+### 1.1 Object介绍
 
-> Object在Java中是独特的存在，它的意义是"万物之始"，它是所有类的父类。
->
-> 即Object中的方法在所有类中都拥有，可以对其进行重写或者默认实现。
+Object在Java中是独特的存在，它的意义是"万物之始"，它是所有类的父类。
 
-# <a id="介绍">Object类介绍</a>
+即Object中的方法在所有类中都拥有，可以对其进行重写或者默认实现。
+
+### 1.2 Object类结构
 
 ![image-20200318173141809](http://rocks526.top/lzx/image-20200318173141809.png)
 
@@ -21,15 +18,17 @@
 - 每个类都有Object作为超类
 - 包括数组，也实现了Object的方法
 
-# <a id="属性">Object类属性</a>
+# 二：Object类属性
 
-> Object中没有定义任何属性
+Object中没有定义任何属性。
 
-# <a id="方法">Object类方法</a>
+# 三：Object类方法
+
+### 3.1 方法列表
 
 ![image-20200318173855123](http://rocks526.top/lzx/image-20200318173855123.png)
 
-## registerNatives
+### 3.2 registerNatives
 
 ```Java
     private static native void registerNatives();
@@ -44,7 +43,7 @@
 
 > Java中的本地方法一般都是一些由C++编写的系统调用相关的代码，可能出于性能或者无法实现跨平台性所以采用C++编写。
 
-## getClass
+### 3.3 getClass
 
 ```java
     public final native Class<?> getClass();
@@ -54,7 +53,7 @@
 
 此方法用于返回运行时对象的Class对象，即创建该对象的类。
 
-## hashCode
+### 3.4 hashCode
 
 ```java
     public native int hashCode();
@@ -64,7 +63,7 @@
 
 理想情况下要求不同实例返回的int值是不同的，相同实例返回相同的int值，但存在Hash冲突，可能不同实例返回相同int值。
 
-## equals
+### 3.5 equals
 
 ```java
     public boolean equals(Object obj) {
@@ -83,7 +82,7 @@
 
 > 之所以要满足如上关系，是因为在Hash系列容器中，查找元素时是首先利用Hash值去进行查找，Hash相等再利用equals方法判断。通过这种方式提高效率。
 
-## clone
+### 3.6 clone
 
 ```java
     protected native Object clone() throws CloneNotSupportedException;
@@ -239,7 +238,7 @@ true
 true
 ```
 
-## toString
+### 3.7 toString
 
 ```java
     public String toString() {
@@ -251,7 +250,7 @@ true
 
 此方法用于打印对象状态，实现信息可视化，一般需要重写用来输出属性等有用信息。
 
-## notify & wait & notifyAll
+### 3.8 notify & wait & notifyAll
 
 ```java
     public final native void notify();
@@ -286,7 +285,7 @@ true
 
 > 在Java中，每个对象都有一个唯一与之对应的监视器（Monitor）。在Monitor监视器中，Java虚拟机会为每个对象维护两个“队列”：一个叫Entry Set（锁池），另外一个叫Wait Set（等待池）。synchronized锁即是通过这两个队列完成同步操作。更多内容参考Java并发编程synchronized节。
 
-## finalize
+### 3.9 finalize
 
 ```java
     protected void finalize() throws Throwable { }

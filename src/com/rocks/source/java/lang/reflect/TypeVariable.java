@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.lang.reflect;
 
 /**
@@ -47,6 +22,11 @@ package java.lang.reflect;
  * underlying type variable.
  *
  * @since 1.5
+ *
+ * 类型变量，例如：
+ * List<T>的T
+ * Map<String,E>里的E
+ *
  */
 public interface TypeVariable<D extends GenericDeclaration> extends Type, AnnotatedElement {
     /**
@@ -67,6 +47,9 @@ public interface TypeVariable<D extends GenericDeclaration> extends Type, Annota
      *     for any reason
      * @return an array of {@code Type}s representing the upper
      *     bound(s) of this type variable
+     * 获取变量的上限，例如：
+     * List<T extends String>返回String
+     * List<E> 返回Object
     */
     Type[] getBounds();
 
@@ -77,6 +60,9 @@ public interface TypeVariable<D extends GenericDeclaration> extends Type, Annota
      * @return the generic declaration declared for this type variable.
      *
      * @since 1.5
+     *
+     * 获取泛型定义的实体，例如类、方法、构造方法
+     *
      */
     D getGenericDeclaration();
 
@@ -84,6 +70,9 @@ public interface TypeVariable<D extends GenericDeclaration> extends Type, Annota
      * Returns the name of this type variable, as it occurs in the source code.
      *
      * @return the name of this type variable, as it appears in the source code
+     *
+     * 返回泛型的名称，例如List<T>返回T
+     *
      */
     String getName();
 
@@ -97,6 +86,7 @@ public interface TypeVariable<D extends GenericDeclaration> extends Type, Annota
      *
      * @return an array of objects representing the upper bounds of the type variable
      * @since 1.8
+     * 返回类型变量的上限
      */
      AnnotatedType[] getAnnotatedBounds();
 }

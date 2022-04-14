@@ -1,30 +1,4 @@
-/*
- * Copyright (c) 1999, 2008, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.util;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -87,16 +61,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class Timer {
+
     /**
-     * The timer task queue.  This data structure is shared with the timer
-     * thread.  The timer produces tasks, via its various schedule calls,
-     * and the timer thread consumes, executing timer tasks as appropriate,
-     * and removing them from the queue when they're obsolete.
+     * 任务队列 ==> 小顶堆
      */
     private final TaskQueue queue = new TaskQueue();
 
     /**
-     * The timer thread.
+     * 调度线程 持有任务队列
      */
     private final TimerThread thread = new TimerThread(queue);
 
@@ -472,27 +444,23 @@ public class Timer {
      }
 }
 
+
 /**
- * This "helper class" implements the timer's task execution thread, which
- * waits for tasks on the timer queue, executions them when they fire,
- * reschedules repeating tasks, and removes cancelled tasks and spent
- * non-repeating tasks from the queue.
+ * 调度线程：
+ *      1.启动提交的定时任务
+ *      2.重复任务执行后重新安排时间
+ *      3.删除已取消的任务和已经执行过的单次执行任务
  */
 class TimerThread extends Thread {
+
     /**
-     * This flag is set to false by the reaper to inform us that there
-     * are no more live references to our Timer object.  Once this flag
-     * is true and there are no more tasks in our queue, there is no
-     * work left for us to do, so we terminate gracefully.  Note that
-     * this field is protected by queue's monitor!
+     * 状态标识 新任务是否被调度 ==> Timer是否还工作
      */
     boolean newTasksMayBeScheduled = true;
 
+
     /**
-     * Our Timer's queue.  We store this reference in preference to
-     * a reference to the Timer so the reference graph remains acyclic.
-     * Otherwise, the Timer would never be garbage-collected and this
-     * thread would never go away.
+     * 任务队列
      */
     private TaskQueue queue;
 
@@ -504,16 +472,18 @@ class TimerThread extends Thread {
         try {
             mainLoop();
         } finally {
-            // Someone killed this Thread, behave as if Timer cancelled
+            // 任务出现异常终止或者定时器被取消
             synchronized(queue) {
                 newTasksMayBeScheduled = false;
-                queue.clear();  // Eliminate obsolete references
+                // 清楚任务队列 释放引用
+                queue.clear();
             }
         }
     }
 
+
     /**
-     * The main timer loop.  (See class comment.)
+     * 定时器主循环
      */
     private void mainLoop() {
         while (true) {
@@ -559,79 +529,81 @@ class TimerThread extends Thread {
     }
 }
 
+
 /**
- * This class represents a timer task queue: a priority queue of TimerTasks,
- * ordered on nextExecutionTime.  Each Timer object has one of these, which it
- * shares with its TimerThread.  Internally this class uses a heap, which
- * offers log(n) performance for the add, removeMin and rescheduleMin
- * operations, and constant time performance for the getMin operation.
+ * 定时任务队列 小顶堆的实现
+ * 复杂度log(n)
  */
 class TaskQueue {
+
     /**
-     * Priority queue represented as a balanced binary heap: the two children
-     * of queue[n] are queue[2*n] and queue[2*n+1].  The priority queue is
-     * ordered on the nextExecutionTime field: The TimerTask with the lowest
-     * nextExecutionTime is in queue[1] (assuming the queue is nonempty).  For
-     * each node n in the heap, and each descendant of n, d,
-     * n.nextExecutionTime <= d.nextExecutionTime.
+     * 任务队列 根据任务的下一次执行时间排列 初始容量128
+     * 也是数组用来实现堆 数组第一个元素空出来 后续堆的父节点都等于子节点/2
      */
     private TimerTask[] queue = new TimerTask[128];
 
     /**
-     * The number of tasks in the priority queue.  (The tasks are stored in
-     * queue[1] up to queue[size]).
+     * 任务数
      */
     private int size = 0;
 
     /**
-     * Returns the number of tasks currently on the queue.
+     * 返回队列任务数
+     * @return
      */
     int size() {
         return size;
     }
 
+
     /**
-     * Adds a new task to the priority queue.
+     * 提交新任务
+     * @param task
      */
     void add(TimerTask task) {
-        // Grow backing store if necessary
+        // 数组已满则进行扩容 每次2倍
         if (size + 1 == queue.length)
             queue = Arrays.copyOf(queue, 2*queue.length);
 
         queue[++size] = task;
+        // 元素上浮 调整堆结构
         fixUp(size);
     }
 
+
     /**
-     * Return the "head task" of the priority queue.  (The head task is an
-     * task with the lowest nextExecutionTime.)
+     * 返回最近要执行的任务 ==> 堆顶元素 (0号元素空出)
+     * @return
      */
     TimerTask getMin() {
         return queue[1];
     }
 
+
     /**
-     * Return the ith task in the priority queue, where i ranges from 1 (the
-     * head task, which is returned by getMin) to the number of tasks on the
-     * queue, inclusive.
+     * 返回第i个任务
+     * @param i
+     * @return
      */
     TimerTask get(int i) {
         return queue[i];
     }
 
+
     /**
-     * Remove the head task from the priority queue.
+     * 最近任务执行完成 出堆
      */
     void removeMin() {
+        // 将最后一个元素放到堆头
         queue[1] = queue[size];
         queue[size--] = null;  // Drop extra reference to prevent memory leak
+        // 下沉 调整堆结构
         fixDown(1);
     }
 
     /**
-     * Removes the ith element from queue without regard for maintaining
-     * the heap invariant.  Recall that queue is one-based, so
-     * 1 <= i <= size.
+     * 快速移除一个任务 不调整堆结构
+     * @param i
      */
     void quickRemove(int i) {
         assert i <= size;
@@ -640,45 +612,46 @@ class TaskQueue {
         queue[size--] = null;  // Drop extra ref to prevent memory leak
     }
 
+
     /**
-     * Sets the nextExecutionTime associated with the head task to the
-     * specified value, and adjusts priority queue accordingly.
+     * 修改堆顶元素的下一次任务时间 && 调整堆结构
+     * @param newTime
      */
     void rescheduleMin(long newTime) {
         queue[1].nextExecutionTime = newTime;
         fixDown(1);
     }
 
+
     /**
-     * Returns true if the priority queue contains no elements.
+     * 判断堆是否为空
+     * @return
      */
     boolean isEmpty() {
         return size==0;
     }
 
+
     /**
-     * Removes all elements from the priority queue.
+     * 清空整个队列
      */
     void clear() {
-        // Null out task references to prevent memory leak
+        // 每个元素置为null 方便gc
         for (int i=1; i<=size; i++)
             queue[i] = null;
 
         size = 0;
     }
 
+
     /**
-     * Establishes the heap invariant (described above) assuming the heap
-     * satisfies the invariant except possibly for the leaf-node indexed by k
-     * (which may have a nextExecutionTime less than its parent's).
-     *
-     * This method functions by "promoting" queue[k] up the hierarchy
-     * (by swapping it with its parent) repeatedly until queue[k]'s
-     * nextExecutionTime is greater than or equal to that of its parent.
+     * 堆上浮
+     * @param k
      */
     private void fixUp(int k) {
         while (k > 1) {
             int j = k >> 1;
+            // 根据任务下次执行时间比较大小
             if (queue[j].nextExecutionTime <= queue[k].nextExecutionTime)
                 break;
             TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;
@@ -686,15 +659,10 @@ class TaskQueue {
         }
     }
 
+
     /**
-     * Establishes the heap invariant (described above) in the subtree
-     * rooted at k, which is assumed to satisfy the heap invariant except
-     * possibly for node k itself (which may have a nextExecutionTime greater
-     * than its children's).
-     *
-     * This method functions by "demoting" queue[k] down the hierarchy
-     * (by swapping it with its smaller child) repeatedly until queue[k]'s
-     * nextExecutionTime is less than or equal to those of its children.
+     * 堆元素下沉
+     * @param k
      */
     private void fixDown(int k) {
         int j;
@@ -710,8 +678,7 @@ class TaskQueue {
     }
 
     /**
-     * Establishes the heap invariant (described above) in the entire tree,
-     * assuming nothing about the order of the elements prior to the call.
+     * 构建堆结构
      */
     void heapify() {
         for (int i = size/2; i >= 1; i--)
