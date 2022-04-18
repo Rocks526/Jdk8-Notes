@@ -6,6 +6,24 @@
 
 - [x] [万物之父Object](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Object源码分析.md)
 
+- [x] [String源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/String源码分析.md)
+
+## Java包装类型
+
+- [x] [Character源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Character源码分析.md)
+  
+- [x] [Integer源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Integer源码分析.md)
+  
+- [x] [Long源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Long源码分析.md)
+
+- [x] [Double源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Double源码分析.md)
+
+- [x] [Float源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Float源码分析.md)
+
+- [x] [Boolean源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Boolean源码分析.md)
+
+- [x] [Short源码分析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/Short源码分析.md)
+
 ## Java容器
 
 - [x] [ArrayList源码解析](https://github.com/Rocks526/Jdk8-Notes/blob/master/docs/ArrayList源码解析.md)

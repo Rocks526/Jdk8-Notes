@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.nio.channels;
 
 import java.io.IOException;
@@ -33,44 +8,9 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.SelectorProvider;
 
 /**
- * A selectable channel for stream-oriented listening sockets.
- *
- * <p> A server-socket channel is created by invoking the {@link #open() open}
- * method of this class.  It is not possible to create a channel for an arbitrary,
- * pre-existing {@link ServerSocket}. A newly-created server-socket channel is
- * open but not yet bound.  An attempt to invoke the {@link #accept() accept}
- * method of an unbound server-socket channel will cause a {@link NotYetBoundException}
- * to be thrown. A server-socket channel can be bound by invoking one of the
- * {@link #bind(java.net.SocketAddress,int) bind} methods defined by this class.
- *
- * <p> Socket options are configured using the {@link #setOption(SocketOption,Object)
- * setOption} method. Server-socket channels support the following options:
- * <blockquote>
- * <table border summary="Socket options">
- *   <tr>
- *     <th>Option Name</th>
- *     <th>Description</th>
- *   </tr>
- *   <tr>
- *     <td> {@link java.net.StandardSocketOptions#SO_RCVBUF SO_RCVBUF} </td>
- *     <td> The size of the socket receive buffer </td>
- *   </tr>
- *   <tr>
- *     <td> {@link java.net.StandardSocketOptions#SO_REUSEADDR SO_REUSEADDR} </td>
- *     <td> Re-use address </td>
- *   </tr>
- * </table>
- * </blockquote>
- * Additional (implementation specific) options may also be supported.
- *
- * <p> Server-socket channels are safe for use by multiple concurrent threads.
- * </p>
- *
- * @author Mark Reinhold
- * @author JSR-51 Expert Group
- * @since 1.4
+ * Jdk1.4引入的非阻塞IO通道，Channel接口的实现类之一
+ * 用于Socket编程的Server端，类似于以前的ServerSocket
  */
-
 public abstract class ServerSocketChannel
     extends AbstractSelectableChannel
     implements NetworkChannel

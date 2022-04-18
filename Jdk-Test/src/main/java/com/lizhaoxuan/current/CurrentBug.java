@@ -1,4 +1,4 @@
-package com.rocks.test.current;
+package com.lizhaoxuan.current;
 
 /**
  * 并发问题复现

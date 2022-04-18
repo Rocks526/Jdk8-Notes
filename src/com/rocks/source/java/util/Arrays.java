@@ -3155,26 +3155,12 @@ public class Arrays {
             a[i] = val;
     }
 
-    // Cloning
+    // ========================================= 克隆操作 =========================================
 
     /**
-     * Copies the specified array, truncating or padding with nulls (if necessary)
-     * so the copy has the specified length.  For all indices that are
-     * valid in both the original array and the copy, the two arrays will
-     * contain identical values.  For any indices that are valid in the
-     * copy but not the original, the copy will contain <tt>null</tt>.
-     * Such indices will exist if and only if the specified length
-     * is greater than that of the original array.
-     * The resulting array is of exactly the same class as the original array.
-     *
-     * @param <T> the class of the objects in the array
-     * @param original the array to be copied
-     * @param newLength the length of the copy to be returned
-     * @return a copy of the original array, truncated or padded with nulls
-     *     to obtain the specified length
-     * @throws NegativeArraySizeException if <tt>newLength</tt> is negative
-     * @throws NullPointerException if <tt>original</tt> is null
-     * @since 1.6
+     * 复制数组
+     * @param original  原数组
+     * @param newLength    新数组长度，从0开始截取
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] copyOf(T[] original, int newLength) {

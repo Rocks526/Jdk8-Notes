@@ -1,15 +1,8 @@
 package java.io;
 
 /**
- * Java中序列化需要实现的接口 以下方法会用到
- *
- * @author  unascribed
- * @see java.io.ObjectOutputStream
- * @see java.io.ObjectInputStream
- * @see java.io.ObjectOutput
- * @see java.io.ObjectInput
- * @see java.io.Externalizable
- * @since   JDK1.1
+ * 标记接口，代表支持序列化
+ * ObjectOutputStream在序列化时，会校验Serializable接口
  */
 public interface Serializable {
 }

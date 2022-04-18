@@ -2,14 +2,18 @@ package com.lizhaoxuan.util;
 
 import com.lizhaoxuan.vo.User;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 /**
- * ArrayList测试
+ * LinkedList测试
+ * 注：整个测试代码，完全是从ArrayList拷贝而来，相当于这两个类的API完全兼容
  * @author lizhaoxuan
  */
-public class ArrayListTest {
+public class LinkedListTest {
 
     public static void main(String[] args) throws Exception {
         // 新增测试
@@ -26,23 +30,44 @@ public class ArrayListTest {
         cloneTest();
         // 切分数组
         subListTest();
-        // 相等判断
-        equalsTest();
+
+        // ============ 队列测试 =====================
+        queueTest();
+        // ============ 栈测试 =====================
+        stackTest();
     }
 
-    private static void equalsTest() {
-        System.out.println("=================== [equalsTest] =================================");
-        ArrayList<Integer> array = new ArrayList<>();
-        LinkedList<Integer> linkedList = new LinkedList<>();
-        System.out.println(array.equals(linkedList));       // true
-        array.add(1);
-        linkedList.add(1);
-        System.out.println(array.equals(linkedList));       // true
+    private static void stackTest() {
+        System.out.println("=================== [stackTest] =================================");
+        LinkedList<Long> stack = new LinkedList<>();
+        System.out.println("stack header = " + stack.peek() + ", stack = " + stack);    // stack header = null, stack = []
+        stack.push(3L);
+        stack.push(8L);
+        System.out.println("stack header = " + stack.peek() + ", stack = " + stack);    // stack header = 8, stack = [8, 3]
+        System.out.println("stack pop header = " + stack.pop() + ", stack = " + stack);     // stack pop header = 8, stack = [3]
+    }
+
+    private static void queueTest() {
+        System.out.println("=================== [queueTest] =================================");
+        LinkedList<Long> queue = new LinkedList<>();
+        boolean offer = queue.offer(1L);
+        System.out.println("add result = " + offer + ", list = " + queue); // add result = true, list = [1]
+        boolean offer2 = queue.offer(5L);
+        System.out.println("add result = " + offer2 + ", list = " + queue); // add result = true, list = [1, 5]
+        Long peek = queue.peek();
+        System.out.println("queue header = " + peek);       // queue header = 1
+        Long pop = queue.poll();
+        System.out.println("queue first element = " + pop + ", queue = " + queue);       // queue first element = 1, queue = [5]
+        queue.addFirst(9L);
+        queue.addLast(8L);
+        System.out.println("queue = " + queue);      // queue = [9, 5, 8]
+        Long last = queue.pollLast();
+        System.out.println("queue last element = " + last + ", queue = " + queue);       // queue last element = 8, queue = [9, 5]
     }
 
     private static void subListTest() {
         System.out.println("=================== [subListTest] =================================");
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         List<Long> subList = list.subList(1, 3); // [8L, 0L]
         System.out.println(subList);
         // 修改测试
@@ -63,18 +88,18 @@ public class ArrayListTest {
     private static void cloneTest() {
         System.out.println("=================== [cloneTest] =================================");
         // 基础类型测试
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         Object clone = list.clone();
         System.out.println(clone);      // [3, 8, 0, 8, 33, 7, 8]
         System.out.println(clone == list);  // false
-        if (clone instanceof ArrayList){
-            ArrayList<Long> cloneObj = (ArrayList<Long>) clone;
+        if (clone instanceof LinkedList){
+            LinkedList<Long> cloneObj = (LinkedList<Long>) clone;
             cloneObj.removeAll(Collections.singletonList(8L));
             System.out.println(cloneObj);       // [3, 0, 33, 7]
             System.out.println(list);   // [3, 8, 0, 8, 33, 7, 8]
         }
         // 引用类型测试
-        ArrayList<User> users = new ArrayList<>();
+        LinkedList<User> users = new LinkedList<>();
         users.add(User.builder().id(1L).name("张三").build());
         users.add(User.builder().id(3L).name("张三3").build());
         users.add(User.builder().id(2L).name("张三2").build());
@@ -83,8 +108,8 @@ public class ArrayListTest {
         Object userClone = users.clone();
         System.out.println(userClone);      // [User(id=1, name=张三), User(id=3, name=张三3), User(id=2, name=张三2), User(id=4, name=张三4), User(id=9, name=张三9)]
         System.out.println(userClone == users);  // false
-        if (userClone instanceof ArrayList){
-            ArrayList<User> userCloneObj = (ArrayList<User>) userClone;
+        if (userClone instanceof LinkedList){
+            LinkedList<User> userCloneObj = (LinkedList<User>) userClone;
             userCloneObj.removeAll(Collections.singletonList(User.builder().id(1L).name("张三").build()));
             System.out.println(userCloneObj);       // [User(id=3, name=张三3), User(id=2, name=张三2), User(id=4, name=张三4), User(id=9, name=张三9)]
             System.out.println(users);   // [User(id=1, name=张三), User(id=3, name=张三3), User(id=2, name=张三2), User(id=4, name=张三4), User(id=9, name=张三9)]
@@ -92,14 +117,14 @@ public class ArrayListTest {
             System.out.println(userCloneObj);       // [User(id=3, name=张三3Modify!!!), User(id=2, name=张三2Modify!!!), User(id=4, name=张三4Modify!!!), User(id=9, name=张三9Modify!!!)]
             System.out.println(users);   // [User(id=1, name=张三), User(id=3, name=张三3Modify!!!), User(id=2, name=张三2Modify!!!), User(id=4, name=张三4Modify!!!), User(id=9, name=张三9Modify!!!)]
         }
-        // 结论：ArrayList是新生成的对象，但里面元素的引用是原有的引用
+        // 结论：LinkedList是新生成的对象，但里面元素的引用是原有的引用
     }
 
     private static void serialTest() throws Exception {
         System.out.println("=================== [serialTest] =================================");
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         // 序列化
-        FileOutputStream fileOutputStream = new FileOutputStream("array-serial.txt");
+        FileOutputStream fileOutputStream = new FileOutputStream("linkedlist-serial.txt");
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
         objectOutputStream.writeObject(list);
         // 反序列化
@@ -107,8 +132,8 @@ public class ArrayListTest {
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         Object readObject = objectInputStream.readObject();
         System.out.println(readObject);     // [3, 8, 0, 8, 33, 7, 8]
-        if (readObject instanceof ArrayList){
-            ArrayList<Long> v = (ArrayList<Long>) readObject;
+        if (readObject instanceof LinkedList){
+            LinkedList<Long> v = (LinkedList<Long>) readObject;
             System.out.println(v == list);      // false
             System.out.println(v);      // [3, 8, 0, 8, 33, 7, 8]
         }
@@ -116,7 +141,7 @@ public class ArrayListTest {
 
     private static void iteratorTest() {
         System.out.println("=================== [iteratorTest] =================================");
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         // 基础迭代，单向
         StringBuilder findStr = new StringBuilder();
         Iterator<Long> iterator = list.iterator();
@@ -150,7 +175,7 @@ public class ArrayListTest {
 
     private static void findTest() {
         System.out.println("=================== [findTest] =================================");
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         // 大小
         int size = list.size();     // 7
         System.out.println(size);
@@ -179,7 +204,7 @@ public class ArrayListTest {
 
     private static void deleteTest() {
         System.out.println("=================== [deleteTest] =================================");
-        ArrayList<Long> list = new ArrayList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
+        LinkedList<Long> list = new LinkedList<>(Arrays.asList(3L, 8L, 0L, 8L, 33L, 7L, 8L));
         // 移除指定元素
         boolean remove = list.remove(1L);       // false ==> [3, 8, 0, 8, 33, 7, 8]
         System.out.println(remove + " ==> " + list);
@@ -201,7 +226,7 @@ public class ArrayListTest {
 
     private static void addTest() {
         System.out.println("=================== [addTest] =================================");
-        ArrayList<Long> list = new ArrayList<>();
+        LinkedList<Long> list = new LinkedList<>();
         // 末尾新增
         list.add(1L);       // [1]
         System.out.println(list);

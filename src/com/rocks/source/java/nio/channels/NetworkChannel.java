@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
 package java.nio.channels;
 
 import java.net.SocketOption;
@@ -31,26 +6,8 @@ import java.util.Set;
 import java.io.IOException;
 
 /**
- * A channel to a network socket.
- *
- * <p> A channel that implements this interface is a channel to a network
- * socket. The {@link #bind(SocketAddress) bind} method is used to bind the
- * socket to a local {@link SocketAddress address}, the {@link #getLocalAddress()
- * getLocalAddress} method returns the address that the socket is bound to, and
- * the {@link #setOption(SocketOption,Object) setOption} and {@link
- * #getOption(SocketOption) getOption} methods are used to set and query socket
- * options.  An implementation of this interface should specify the socket options
- * that it supports.
- *
- * <p> The {@link #bind bind} and {@link #setOption setOption} methods that do
- * not otherwise have a value to return are specified to return the network
- * channel upon which they are invoked. This allows method invocations to be
- * chained. Implementations of this interface should specialize the return type
- * so that method invocations on the implementation class can be chained.
- *
- * @since 1.7
+ * 网络Channel通道
  */
-
 public interface NetworkChannel
     extends Channel
 {
